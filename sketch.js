@@ -19,6 +19,9 @@ let player;
 let playerImg, bgImg;
 let jumpSfx, musicSfx;
 let musicStarted = false;
+let debugMode = false;
+let moonGravity = false;
+let showHitboxes = false;
 
 let playerAnis = {
   idle: { row: 0, frames: 4, frameDelay: 10 },
@@ -154,6 +157,15 @@ function startMusicIfNeeded() {
 
 function keyPressed() {
   startMusicIfNeeded();
+  if (key === "f" || key === "F") {
+    debugMode = !debugMode;
+  }
+  if (key === "m" || key === "M") {
+    moonGravity = !moonGravity;
+  }
+  if (key === "h" || key === "H") {
+    showHitboxes = !showHitboxes;
+  }
 }
 
 function mousePressed() {
@@ -175,6 +187,14 @@ function draw() {
   // --- PLAYER CONTROLS ---
   // first check to see if the player is on the ground
   let grounded = sensor.overlapping(ground);
+
+  if (moonGravity) {
+    world.gravity.y = GRAVITY * 0.2;
+  } else {
+    world.gravity.y = GRAVITY;
+  }
+
+  allSprites.debug = showHitboxes;
 
   // -- ATTACK INPUT --
   if (grounded && !attacking && kb.presses("space")) {
@@ -221,4 +241,35 @@ function draw() {
 
   // --- KEEP IN VIEW ---
   player.pos.x = constrain(player.pos.x, FRAME_W / 2, VIEWW - FRAME_W / 2);
+
+  if (debugMode) {
+    camera.off();
+    fill(0, 150);
+    noStroke();
+    rect(5, 5, 160, 60);
+    fill(250);
+    textSize(12);
+    text("DEBUG MODE", 10, 20);
+    text("M: Moon Gravity: " + (moonGravity ? "ON" : "OFF"), 10, 35);
+    text("H: Hitboxes: " + (showHitboxes ? "ON" : "OFF"), 10, 50);
+    camera.on();
+  }
+  camera.off();
+
+  // reset drawing styles (important!)
+  push();
+  resetMatrix();
+
+  fill(0, 180);
+  noStroke();
+  rect(5, VIEWH - 25, 170, 20);
+
+  fill(255);
+  textSize(14);
+  textAlign(LEFT, TOP);
+  text("Press F for Debug Mode", 10, VIEWH - 23);
+
+  pop();
+
+  camera.on();
 }
